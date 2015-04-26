@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, width=device-width, user-scalable=no">
+    <title>界面展示</title>
+    <link href="../bower_components/flat-ui/dist/css/vendor/bootstrap.min.css" rel="stylesheet">
+    <link href="../bower_components/flat-ui/dist/css/flat-ui.css" rel="stylesheet">
+    <script src="../bower_components/flat-ui/dist/js/vendor/jquery.min.js"></script>
+    <style>
+        body{-webkit-perspective: 100em;background-color:#bdc3c7}
+        .box{position:absolute;margin:auto;top:0;left:0;bottom:0;right:0;background-color:#eee;-webkit-transform-style: preserve-3d;}
+        .box-content{position:relative;height:100%;}
+        .box-face{position:absolute;left:0;top:0;width:100%;height:100%;line-height:4em;text-align:center;background-color:#cacfd2;border:2px solid #2c3e50;}
+        .box .box-face:nth-child(1) {-webkit-transform: translateZ(2em);}
+        .box .box-face:nth-child(6) {-webkit-transform: rotateX(180deg) translateZ(2em);}
+        .box .box-face:nth-child(3) {-webkit-transform: rotateX(90deg) translateZ(2em);}
+        .box .box-face:nth-child(4) {-webkit-transform: rotateX(-90deg) translateZ(2em);}
+        .box .box-face:nth-child(2) {-webkit-transform: rotateY(90deg) translateZ(2em);}
+        .box .box-face:nth-child(5) {-webkit-transform: rotateY(-90deg) translateZ(2em);}
+
+        .box-next{-webkit-animation:wq-next 0.4s 1 alternate;-webkit-animation-timing-function:ease;}
+        .box-prev{-webkit-animation:wq-prev 0.4s 1 alternate;-webkit-animation-timing-function:ease;}
+        .box-from{-webkit-animation:wq-from 0.4s 1 alternate;-webkit-animation-timing-function:ease;}
+        .box-to{-webkit-animation:wq-to 0.4s 1 alternate;-webkit-animation-timing-function:ease;}
+
+        @-webkit-keyframes wq-next /* Safari and Chrome */
+        {
+            0%   {-webkit-transform: rotateX(0deg);}
+            100%   {-webkit-transform: rotateX(90deg);}
+        }
+        @-webkit-keyframes wq-prev /* Safari and Chrome */
+        {
+            0%   {-webkit-transform: rotateX(0deg);}
+            100%   {-webkit-transform: rotateX(-90deg);}
+        }
+        @-webkit-keyframes wq-from /* Safari and Chrome */
+        {
+            0%   {-webkit-transform: rotateY(0deg);}
+            100%   {-webkit-transform: rotateY(90deg);}
+        }
+        @-webkit-keyframes wq-to /* Safari and Chrome */
+        {
+            0%   {-webkit-transform: rotateY(0deg);}
+            100%   {-webkit-transform: rotateY(-90deg);}
+        }
+
+    </style>
+</head>
+<body>
+    <div class="box-content">
+        <div class="box">
+            <div class="box-face box-front"></div>
+            <div class="box-face"></div>
+            <div class="box-face"></div>
+            <div class="box-face"></div>
+            <div class="box-face"></div>
+            <div class="box-face"></div>
+        </div>
+    </div>
+
+
+    <script>
+     /*
+        思考一下用什么样的数据格式，后期将会使用md文件解析，前期将会写死数据
+        h1~h6代表各式标题
+        p代表内容
+    */
+var data = [
+    {
+        h1:'这是一个大标题1',
+        h2:'这是一个副标题',
+        p:'这是一个段落'
+    },
+    {
+        slide: {
+            0:{
+                h1:'这是一个子段落的标题',
+                h2:'这是一个度白头i'
+            },
+            1:{
+                h1:'这是一个子段落的标题2'
+            }
+        }
+    },
+    {
+        slide: {
+            0:{
+                h1:'这是一个子段落的标题'
+            },
+            1:{
+                h1:'这是一个子段落的标题2'
+            }
+        }
+    },
+    {
+        h1:'这是一个大标题1',
+        h2:'这是一个副标题',
+        p:'这是一个段落'
+    }
+];
+    
+    </script>
+
+<script>
+    function getBox() {
+        var w = window.innerWidth
+                || document.documentElement.clientWidth
+                || document.body.clientWidth,
+            h = window.innerHeight
+                || document.documentElement.clientHeight
+                || document.body.clientHeight;
+            size_w = parseInt(0.96 * w),
+            size_h = parseInt(0.96 * h),
+            size = parseInt(size_w < size_h ? size_w : size_h);
+        $('body').css('height', h + 'px');
+        $('.box-content').css({
+            '-webkit-transform': 'translateZ(' + (-size/2) + 'px)'
+        });
+        $('.box').css({
+            'height': size + 'px',
+            'width': size + 'px',
+        });
+        $('.box-face').eq(0).css('-webkit-transform', 'translateZ(' + size/2 + 'px)');
+        $('.box-face').eq(1).css('-webkit-transform', 'rotateY(90deg) translateZ(' + size/2 + 'px)');
+        $('.box-face').eq(2).css('-webkit-transform', 'rotateX(90deg) translateZ(' + size/2 + 'px)');
+        $('.box-face').eq(3).css('-webkit-transform', 'rotateX(-90deg) translateZ(' + size/2 + 'px)');
+        $('.box-face').eq(4).css('-webkit-transform', 'rotateY(-90deg) translateZ(' + size/2 + 'px)');
+        $('.box-face').eq(5).css('-webkit-transform', 'rotateX(180deg) translateZ(' + size/2 + 'px)');
+    }
+
+    function doSomething(len, arr, data) {
+        var active = false, // 这个active用来控制速度，此方法不优雅，第二版需要修改
+            node = $('.box'),
+            target = $('.box-front'),
+            jump = 0,
+            step = 0,
+            floor = 0,
+            arrow = [];
+
+        var dealwith = function(obj) {
+            target.html('');
+            target.append($('<h1>' + obj['h1'] + '</h1>'));
+            floor = 1;
+            arrow = []; //这里用了全局变量，其实是不对的
+            for (var i in obj) {
+                arrow.push({
+                    'name': i,
+                    'tag': obj[i]
+                });
+            }
+            /*
+            for (var i in obj) {
+                console.log(i);
+                var ct = $("<" + i + ">" + obj[i] + "</" + i + ">");
+                console.log(ct);
+                console.log(ct);
+                target.append(ct);
+            }*/
+        }
+
+        var deliver = function(num) {
+            console.log(num);
+            console.log(floor);
+            console.log(arrow);
+            if (floor < arrow.length && num === 1) {
+                console.log('加一行');
+                target.append($('<' + arrow[floor].name + '>' + arrow[floor].tag + '</' + arrow[floor].name + '>'));
+                floor ++;
+            } else if (floor > 0 && num === -1) {
+                console.log('减一行');
+                target.children().last().remove();
+                floor --;
+            }
+
+
+
+            // 这里的逻辑其实很简单，1添加新的，-1减少旧的
+        }
+
+        var deside = function(classname) {
+            switch(classname) {
+                case 'box-from':
+                    if (jump <= 0) {
+                        return;
+                    } else {
+                        jump --;
+                        step = 0;
+                    }
+                    break;
+                case 'box-to':
+                    if (jump >= len - 1) {
+                        return; 
+                    } else {
+                        jump ++;
+                        step = 0;
+                    }
+                    break;
+                case 'box-prev':
+                    if (step <= 0) {
+                        return;
+                    } else {
+                        step --;
+                    }
+                    break;
+                case 'box-next':
+                    if (step >= arr[jump] - 1) {
+                        return;
+                    } else {
+                        step ++;
+                    }
+                    break;
+                }
+            console.log('页码:' + jump + ',页脚' + step);
+
+            active = true;
+            node.addClass(classname);
+            
+            setTimeout(function(){
+                active = false;
+                node.removeClass(classname);
+                if (arr[jump] == 1) {
+                    dealwith(data[jump]);
+                } else {
+                    dealwith(data[jump]['slide'][step]);
+                }
+            }, 400);
+        }
+
+        //初始化触发
+        dealwith(data[0]);
+
+        $(window).keydown(function(event) {
+            if (!active) {
+                console.log("Key: " + event.which);
+                switch(event.which) {
+                    case 37:
+                        console.log('上一节');
+                        deside('box-from');
+                        break;
+                    case 72:
+                        console.log('上一节');
+                        deside('box-from');
+                        break;
+                    case 39:
+                        console.log('下一节');
+                        deside('box-to');
+                        break;
+                    case 76:
+                        console.log('下一节');
+                        deside('box-to');
+                        break;
+                    case 38:
+                        console.log('上一页');
+                        deside('box-prev');
+                        break;
+                    case 40:
+                        console.log('下一页');
+                        deside('box-next');
+                        break;
+                    case 75:
+                        console.log('上一段');
+                        deliver(-1);
+                        break;
+                    case 74:
+                        console.log('下一段');
+                        deliver(1);
+                        break;
+                    case 32:
+                        console.log('下一段');
+                        deliver(1);
+                        break;
+                    default:
+                        console.log('下一段');
+                        deliver(1);
+                }
+            }
+        });
+    }
+
+    /*每一页需要单独计算当前需要多少步结束，每一步的操作是什么*/
+    /*先实现按页面加载，再实现每一个界面内部的分布加载*/
+    console.log('数据' + data);
+    console.log('一共有' + data.length + '页');
+
+    var data_len = data.length,
+        data_data = [];
+    for (var i = 0; i < data_len; i ++) {
+        if (data[i].slide) {
+            data_data.push(Object.getOwnPropertyNames(data[i].slide).length);
+        } else {
+            data_data.push(1);
+        }
+    }
+
+    getBox();
+    doSomething(data_len, data_data, data);
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
